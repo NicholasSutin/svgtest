@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engine Model Viewer</title>
+  
+  <!-- Import model-viewer component -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+  
+  <style>
+    body { 
+      margin: 0; 
+      overflow-x: hidden;
+      overflow-y: auto;
+      font-family: Arial, sans-serif;
+    }
+    
+    .viewer-section {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    model-viewer {
+      width: 100%;
+      height: 100%;
+    }
+
+    .section-title {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: black;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      z-index: 10;
+    }
+
+    .button-container {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border-radius: 8px;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .download-btn, .github-btn {
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .download-btn {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .download-btn:hover {
+      background: #45a049;
+    }
+
+    .github-btn {
+      background: #24292e;
+      color: white;
+      border-left: 2px solid rgba(255,255,255,0.2);
+    }
+
+    .github-btn:hover {
+      background: #2f363d;
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .viewer-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0);
+      cursor: pointer;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s ease;
+    }
+
+    .viewer-overlay:hover {
+      background: rgba(0,0,0,0.1);
+    }
+
+    .viewer-overlay.active {
+      display: none;
+    }
+
+    .click-hint {
+      background: rgba(255,255,255,0.9);
+      padding: 8px;
+      border-radius: 5px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #333;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .viewer-overlay:hover .click-hint {
+      opacity: 1;
+    }
+
+    .toast {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.9);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 1rem;
+      font-weight: 600;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .toast.show {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0;}
+      to { opacity: 1;}
+    }
+
+    .toast-icon {
+      width: 24px;
+      height: 24px;
+      background: #4CAF50;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <!-- Toast notification -->
+  <div id="toast" class="toast">
+    <span>ESC to exit</span>
+  </div>
+
+  <a style="position:fixed; top:10px; left:10px; background-color:orange; border-radius:5px; border:none; padding:0px 7px 4px; text-decoration: none; color:black; font-size:14px; z-index:99;" 
+  href="media/engineBlueprint.blend" download="engineBlueprint.blend" 
+  >.Blend
+            <svg style="width:10px; transform:translateY(4px);" class="icon" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/>
+        </svg>
+    </a>
+
+    <a style="position:fixed; top:50px; left:10px; background-color:rgb(150, 150, 150); border-radius:5px; border:none; padding:0px 7px 4px; text-decoration: underline; color:rgb(5, 0, 46); font-size:14px; z-index:99;" 
+  href="https://github.com/nicholassutin/" target="_blank"
+  >Github Link
+        <svg style="width:12px; transform:translateY(4px)" class="icon" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+        </svg>
+    </a>
+
+  <!-- First Viewer Section - Original Engine -->
+  <div class="viewer-section" id="section1">
+    <div class="section-title">Original Engine</div>
+    <div class="viewer-overlay" data-section="section1">
+      <div class="click-hint">Click to interact with model</div>
+    </div>
+    <model-viewer 
+      alt="Original Engine Model" 
+      src="media/originalEngine.glb" 
+      shadow-intensity="1" 
+      camera-controls 
+      touch-action="pan-y"
+      auto-rotate
+      auto-rotate-delay="0">
+    </model-viewer>
+
+    <div class="button-container">
+      <a href="media/originalEngine.glb" download="originalEngine.glb" class="download-btn">
+        <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/>
+        </svg>
+        GLB
+      </a>
+      <a href="media/originalEngine.stl" download="originalEngine.stl" class="download-btn">
+        <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/>
+        </svg>
+        STL
+      </a>
+    </div>
+  </div>
+
+  <!-- Second Viewer Section - Flattened Engine -->
+  <div class="viewer-section" id="section2">
+    <div class="section-title">Flattened Engine</div>
+    <div class="viewer-overlay" data-section="section2">
+      <div class="click-hint">Click to interact with model</div>
+    </div>
+    <model-viewer 
+      alt="Flattened Engine Model" 
+      src="media/flattenedEngine.glb" 
+      shadow-intensity="1" 
+      camera-controls 
+      touch-action="pan-y"
+      auto-rotate
+      auto-rotate-delay="0">
+    </model-viewer>
+
+    <div class="button-container">
+      <a href="media/flattenedEngine.glb" download="flattenedEngine.glb" class="download-btn">
+        <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/>
+        </svg>
+        GLB
+      </a>
+      <a href="media/flattenedEngine.stl" download="flattenedEngine.stl" class="download-btn">
+        <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z"/>
+        </svg>
+        STL
+      </a>
+    </div>
+  </div>
+
+  <script>
+    let activeSection = null;
+    const toast = document.getElementById('toast');
+    const overlays = document.querySelectorAll('.viewer-overlay');
+
+    // Handle overlay click to activate viewer
+    overlays.forEach(overlay => {
+      overlay.addEventListener('click', function() {
+        const sectionId = this.getAttribute('data-section');
+        const section = document.getElementById(sectionId);
+        
+        // Activate this section
+        activeSection = sectionId;
+        this.classList.add('active');
+        
+        // Disable scroll
+        document.body.style.overflow = 'hidden';
+        
+        // Show toast
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3000);
+      });
+    });
+
+    // Handle escape key to deactivate
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && activeSection) {
+        // Deactivate
+        const overlay = document.querySelector(`[data-section="${activeSection}"]`);
+        overlay.classList.remove('active');
+        activeSection = null;
+        
+        // Re-enable scroll
+        document.body.style.overflow = 'auto';
+        
+        // Hide toast if showing
+        toast.classList.remove('show');
+      }
+    });
+
+    // Prevent scrolling when a section is active
+    document.addEventListener('wheel', function(e) {
+      if (activeSection) {
+        const activeOverlay = document.querySelector(`[data-section="${activeSection}"]`);
+        if (!activeOverlay.classList.contains('active')) {
+          return;
+        }
+        // Let model-viewer handle the wheel event
+      }
+    }, { passive: true });
+  </script>
+</body>
+</html>
